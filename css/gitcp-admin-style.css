@@ -1,0 +1,24 @@
+.gitcu-main-area-content{
+    display: flex;
+    width: 90%;
+    margin-top: 20px;
+}
+.gitcu-left-side{
+    width: 70%;
+    background: #fff;
+    margin-right: 2%;
+    padding: 20px 30px;
+}
+.gitcu-right-side{
+    width: 28%;
+    background: #fff;
+    padding: 20px 30px;
+}
+.developer-info h4{
+    margin-bottom: 0px;
+    line-height: 16px;
+}
+.developer-info p{
+    margin-bottom: 0px;
+    line-height: 16px;
+}
