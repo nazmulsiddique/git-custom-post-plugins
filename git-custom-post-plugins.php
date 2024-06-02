@@ -15,15 +15,10 @@
 /*
 * Plugins Option Page Function
  */
-// Add Menu in Dashboard
-// function gitcp_custom_post_settings_page() {
-//     add_menu_page('Custom Post for new feature', 'Custom Post', 'manage_options', 'gitcp-plugin-option', 'gitcp_create_page', 'dashicons-embed-post
-//     ', '50');
-// }
-// add_action('admin_menu', 'gitcp_custom_post_settings_page');
 
 /* Loading Css File for Frontend*/
 function gitcp_custom_post_enqueue_style() {
+    wp_enqueue_style('bootstrap-css', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css');
     wp_enqueue_style('gitcp-main-style', plugins_url('css/gitcp-main-style.css', __FILE__ ));
 }
 add_action('wp_enqueue_scripts', 'gitcp_custom_post_enqueue_style');
@@ -31,6 +26,7 @@ add_action('wp_enqueue_scripts', 'gitcp_custom_post_enqueue_style');
 /* Loading JS File for Frontend */
 function gitcp_custom_post_enqueue_script() {
     wp_enqueue_script('jquery');
+    wp_enqueue_script('bootstrap-js', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js');
     wp_enqueue_script('gitcp-main-script', plugins_url('js/gitcp-main-script.js', __FILE__ ));
 }
 add_action('wp_enqueue_scripts', 'gitcp_custom_post_enqueue_script');
@@ -101,20 +97,33 @@ if ( ! function_exists('gitcu_custom_post_type') ) {
 /* Custom Post Type Loop show */
 function gitcu_custom_post_type_loop() {
     $args = array(
-        'post_type'      => array( 'git_custom_post_type' ),
-        'post_status'    => array( 'publish' ),
+    'post_type'      => array( 'git_custom_post_type' ),
+    'post_status'    => array( 'publish' ),
     );
     $gitcu_query = new WP_Query( $args );
-    if ( $gitcu_query->have_posts() ) {
-        while ( $gitcu_query->have_posts() ) {
-            $gitcu_query->the_post(); ?>
-
-            <h2><?php the_title(); ?></h2>
-
-            <?php
-        }
+    if ( $gitcu_query->have_posts() ) { ?>
+    <div class="container">
+       <div class="row">
+          <?php
+             while ( $gitcu_query->have_posts() ) {
+                 $gitcu_query->the_post(); ?>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <?php the_post_thumbnail('medium', array('class' => 'card-img-top img-fluid')); ?>
+                    <div class="card-body">
+                    <h2 class="card-title"><?php the_title(); ?></h2>
+                    <p class="card-text"><?php the_content(); ?></p>
+                    <a href="#" class="btn btn-primary">Read More</a>
+                    </div>
+                </div>
+            </div>
+          <?php
+             } ?>
+       </div>
+    </div>
+    <?php
     } else {
-        // No posts found
+    // No posts found
     }
     wp_reset_postdata();
 }
@@ -125,3 +134,58 @@ function gitcu_custom_post_short_code() {
     return ob_get_clean();
 }
 add_shortcode( 'git-my-custom-post-show', 'gitcu_custom_post_short_code' );
+
+/* Redirect Plugins Setting page */
+register_activation_hook( __FILE__, 'gitcu_custom_post_plugin_activate' );
+add_action('admin_init', 'gitcu_custom_post_plugin_redirect');
+function gitcu_custom_post_plugin_activate() {
+    add_option('gitcu_custom_post_plugin_do_activation_redirect', true);
+}
+function gitcu_custom_post_plugin_redirect() {
+    if (get_option('gitcu_custom_post_plugin_do_activation_redirect', false)) {
+        delete_option('gitcu_custom_post_plugin_do_activation_redirect');
+        wp_redirect('edit.php?post_type=git_custom_post_type&page=custom-post-setting-page-gitcu');
+    }
+}
+
+
+/**
+ * Adds a submenu page under a custom post type parent.
+ */
+function gitcp_custom_post_settings_menu() {
+    add_submenu_page(
+        'edit.php?post_type=git_custom_post_type',
+        __( 'Settings', 'gitcu' ),
+        __( 'Settings', 'gitcu' ),
+        'manage_options',
+        'custom-post-setting-page-gitcu',
+        'gitcp_custom_post_setting_page'
+    );
+}
+add_action('admin_menu', 'gitcp_custom_post_settings_menu');
+/**
+ * Display callback for the submenu page.
+ */
+
+function gitcp_custom_post_setting_page(){ ?>
+    <div class="gitcu-main-area">
+        <div class="gitcu-main-area-content">
+            <div class="gitcu-left-side">
+                <h2>Custom Post Settings Option</h2><hr>
+                <h2>Plugin Short Code: <code>[git-my-custom-post-show]</code></h2>
+            </div>
+            <div class="gitcu-right-side">
+                <div class="developer-info">
+                    <h2>Developer Info</h2><hr>
+                    <h4>Md. Nazmul Siddique</h4>
+                    <p>Web Developer</p>
+                    <p><a href="mailto:nazmulit92@gmail.com">nazmulit92@gmail.com</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<?php
+}
+
+?>
